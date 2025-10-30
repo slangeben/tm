@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>T & M: glitch memory</title>
+<style>
+  body {
+    margin: 0;
+    padding: 0;
+    background: url('map.png') no-repeat center center fixed;
+    background-size: cover;
+    font-family: Helvetica, Arial, sans-serif;
+    color: white;
+    overflow: hidden;
+  }
+
+  .object {
+    position: absolute;
+    cursor: pointer;
+    text-align: center;
+    transition: transform 0.3s ease;
+  }
+
+  img {
+    width: 120px;
+    opacity: 0.9;
+  }
+
+  img:hover {
+    transform: scale(1.05);
+    opacity: 1;
+  }
+
+  .order {
+    font-size: 14px;
+    color: rgba(255,255,255,0.9);
+    margin-top: 5px;
+  }
+
+  .dialog-box {
+    position: absolute;
+    background: blue;
+    color: white;
+    border: 1px solid white;
+    padding: 20px;
+    width: 320px;
+    font-size: 14px;
+    letter-spacing: 0.2px;
+    cursor: move;
+  
+  }
+
+  .close-btn {
+    position: absolute;
+    top: 5px;
+    right: 8px;
+    background: none;
+    border: none;
+    color: white;
+    font-size: 16px;
+    cursor: pointer;
+  }
+
+  .input-box {
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: blue;
+    color: white;
+    padding: 15px 25px;
+    border: 1px solid white;
+    text-align: center;
+    width: 320px;
+    font-size: 14px;
+    letter-spacing: 0.2px;
+
+  }
+
+  input {
+    margin-top: 8px;
+    padding: 6px;
+    border: 1px solid white;
+    background: transparent;
+    color: white;
+    text-align: center;
+    font-family: Helvetica;
+  }
+
+  input::placeholder {
+    color: rgba(255,255,255,0.7);
+  }
+
+  button {
+    margin-top: 10px;
+    background: white;
+    color: blue;
+    border: none;
+    padding: 6px 12px;
+    cursor: pointer;
+    font-family: Helvetica;
+    font-size: 13px;
+  }
+
+  button:hover {
+    background: #eaeaea;
+  }
+
+  /* Vimeo overlay */
+  .video-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: black;
+    z-index: 100;
+  }
+
+  .video-overlay iframe {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  .video-close {
+    position: fixed;
+    top: 20px;
+    right: 30px;
+    z-index: 101;
+    background: rgba(255,255,255,0.85);
+    border: none;
+    color: blue;
+    font-size: 20px;
+    padding: 5px 10px;
+    cursor: pointer;
+    font-family: Helvetica;
+  }
+</style>
+</head>
+<body>
+  <!-- Clickable objects -->
+  <div class="object" id="rec" style="top: 60%; left: 20%;">
+    <img src="rec.png" alt="Tape Recorder">
+    <div class="order">1</div>
+  </div>
+
+  <div class="object" id="ssd" style="top: 35%; left: 45%;">
+    <img src="ssd.png" alt="Hard Drive">
+    <div class="order">2</div>
+  </div>
+
+  <div class="object" id="clock" style="top: 20%; left: 70%;">
+    <img src="clock.png" alt="Digital Clock">
+    <div class="order">3</div>
+  </div>
+
+  <!-- Dialogue boxes -->
+  <div class="dialog-box" id="dialog1" style="display:none; top: 55%; left: 10%;">
+    <button class="close-btn" onclick="closeDialog('dialog1')">×</button>
+    <p>Recorded sounds become echoes of identity: replayed, remixed, never identical to their origin.</p>
+  </div>
+
+  <div class="dialog-box" id="dialog2" style="display:none; top: 30%; left: 40%;">
+    <button class="close-btn" onclick="closeDialog('dialog2')">×</button>
+    <p>Storage is fragile. Every fragment of data shifts meaning when it's perceived by someone else, adding their imagination to your reality.</p>
+  </div>
+
+  <div class="dialog-box" id="dialog3" style="display:none; top: 15%; left: 65%;">
+    <button class="close-btn" onclick="closeDialog('dialog3')">×</button>
+    <p>Time fractures and reforms, while the glitch reveals new versions of our place.</p>
+    <img src="map.png" alt="Map" style="width:80px; margin-top:10px;">
+  </div>
+
+  <!-- Password box -->
+  <div class="input-box">
+    <p>Fold the map on the table out to reveal our password</p>
+    <input id="keyword" type="text" placeholder="type here">
+    <br>
+    <button onclick="checkWord()">submit</button>
+  </div>
+
+  <!-- Vimeo overlay -->
+  <div class="video-overlay" id="videoOverlay">
+    <button class="video-close" onclick="closeVideo()">×</button>
+    <div style="padding:56.25% 0 0 0; position:relative;">
+      <iframe id="vimeoFrame" src="" frameborder="0"
+        allow="autoplay; fullscreen; picture-in-picture"
+        style="position:absolute; top:0; left:0; width:100%; height:100%;"
+        title="Glitch Memory Video">
+      </iframe>
+    </div>
+  </div>
+
+  <script src="https://player.vimeo.com/api/player.js"></script>
+
+  <script>
+    const dialogMap = {
+      rec: 'dialog1',
+      ssd: 'dialog2',
+      clock: 'dialog3'
+    };
+
+    Object.keys(dialogMap).forEach(id => {
+      document.getElementById(id).addEventListener('click', () => {
+        const dialog = document.getElementById(dialogMap[id]);
+        dialog.style.display = 'block';
+      });
+    });
+
+    function closeDialog(id) {
+      document.getElementById(id).style.display = 'none';
+    }
+
+    function checkWord() {
+      const val = document.getElementById('keyword').value.trim().toLowerCase();
+      const overlay = document.getElementById('videoOverlay');
+      const iframe = document.getElementById('vimeoFrame');
+      if (val === 'glitch') {
+        iframe.src = "https://player.vimeo.com/video/1132001237?autoplay=1";
+        overlay.style.display = 'block';
+      } else {
+        alert('incorrect password');
+      }
+    }
+
+    function closeVideo() {
+      const overlay = document.getElementById('videoOverlay');
+      const iframe = document.getElementById('vimeoFrame');
+      iframe.src = "";
+      overlay.style.display = 'none';
+    }
+
+    // --- Make dialogue boxes draggable ---
+    dragElement(document.getElementById("dialog1"));
+    dragElement(document.getElementById("dialog2"));
+    dragElement(document.getElementById("dialog3"));
+
+    function dragElement(elmnt) {
+      let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
+      elmnt.onmousedown = dragMouseDown;
+
+      function dragMouseDown(e) {
+        e = e || window.event;
+        e.preventDefault();
+        pos3 = e.clientX;
+        pos4 = e.clientY;
+        document.onmouseup = closeDragElement;
+        document.onmousemove = elementDrag;
+      }
+
+      function elementDrag(e) {
+        e = e || window.event;
+        e.preventDefault();
+        pos1 = pos3 - e.clientX;
+        pos2 = pos4 - e.clientY;
+        pos3 = e.clientX;
+        pos4 = e.clientY;
+        elmnt.style.top = (elmnt.offsetTop - pos2) + "px";
+        elmnt.style.left = (elmnt.offsetLeft - pos1) + "px";
+      }
+
+      function closeDragElement() {
+        document.onmouseup = null;
+        document.onmousemove = null;
+      }
+    }
+  </script>
+</body>
+</html>
